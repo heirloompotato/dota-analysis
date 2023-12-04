@@ -6,8 +6,4 @@ Dota 2 is a multiplayer online battle arena (MOBA) video game that I played prim
 - `Dota-Match-Analysis.Rmd` contains the R code used for analysis
 - `main.py` makes the API call to the open-source platform [OpenDota API](https://docs.opendota.com/)
 - `webscrape.py` scrapes data from a Dota 2 Wikipedia page [Liquipedia](https://liquipedia.net/dota2/Hero_Roles)
-<<<<<<< HEAD
 - `Dota-Match-Analysis_files` contains the data collected
-=======
-- `Dota-Match-Analysis_files` contains the data collected
->>>>>>> 9efa738d1471b7a4374e1f54dc3bdb88a831226d
