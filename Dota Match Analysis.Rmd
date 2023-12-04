@@ -8,7 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Introduction
 Dota 2 is a multiplayer online battle arena (MOBA) video game by Valve Corporation. Two teams of five players compete against each other, with the goal of destroying the opponent team's Ancient, a guarded structure located within their bases. Each player controls a unique hero, which has distinct abilities and roles.
 
-My own matches will be analysed in this project, with the main goal of understanding what factors improve my odds of winning. Most of the data is retrieved from the OpenDota API <https://docs.opendota.com/>. Extra data on hero attributes is scraped from a Dota 2 Wikipedia page <https://liquipedia.net/dota2/Hero_Roles>.
+My own matches will be analysed in this project, with the main goal of understanding what factors improve my odds of winning. Most of the data is retrieved from the [OpenDota API](https://docs.opendota.com/). Extra data on hero attributes is scraped from a Dota 2 Wikipedia page [Liquipedia](https://liquipedia.net/dota2/Hero_Roles).
 
 ## Loading Data and Dependencies
 ```{r, message = FALSE, warning = FALSE}
@@ -25,7 +25,7 @@ library(caret)
 theme_set(theme_minimal())
 
 # Importing data
-file.path <-"*"
+file.path <-"****"
 hero <- read.csv(paste0(file.path, "dotahero.csv"), header = TRUE)
 heroroles <- read.csv(paste0(file.path, "dotaheroroles.csv"), header = TRUE)
 matches <- read.csv(paste0(file.path, "dotamatches.csv"), header = TRUE)
@@ -78,7 +78,7 @@ print(heroroles$Hero[which(heroroles$role.sum == 0)])
 
 Hero attributes will be assessed to predict win rates. As such, heroes with more roles attributed to them will be weighted higher. A histogram of the sum of each heros' role attributes (excluding complexity) is plotted. 
 
-A relatively wide distribution is seen, thus normalisation might have to be done to ensure equal weighting.
+A relatively wide distribution is seen, thus normalisation can be considered to ensure equal weighting.
 
 One value is 0, suggesting an error on the website. 
 
@@ -93,8 +93,6 @@ hero$Melee <- ifelse(hero$attack_type == "Melee", 1,0)
 hero <- merge(hero, heroroles, by.x = "localized_name", by.y = "Hero")
 # Removing unnecessary columns, renaming hero name
 hero <- hero[, c(-3,-5,-17)] %>% rename(name = localized_name)
-#Standardised hero role attributes
-#standardhero <- hero %>% mutate_at(c(7:15), list(~./role.sum)) %>% .[,c(-3,-16)] %>% rename(name = localized_name)
 ```
 
 The last faulty value is fixed. The Melee column is converted to binary since only melee and ranged are possible. Both tables are merged, with unnecessary columns removed.
@@ -112,6 +110,7 @@ Explanation of variables in hero data:
 - **primary_attr**: An attribute that is either strength, intelligence or agility, which is hard to interpret without Dota knowledge
 
 - **Melee**: 1 if the hero attacks with melee, and 0 if it is ranged
+
 A higher number for the following attributes relates to a higher intensity:
 
 - **Complexity**: Difficulty in playing a hero
@@ -128,7 +127,7 @@ A higher number for the following attributes relates to a higher intensity:
 
 - **Durable**: A hero that can survive high amounts of damage
 
-- **Support**: A hero supports allies and typically the carry, and is less dependent on gold and items
+- **Support**: A hero that supports allies, typically the carry, and is less dependent on gold and items
 
 - **Pusher**: A hero that deals high amounts of damage to towers and structures
 
@@ -234,10 +233,6 @@ matches %>% group_by(group = cut(start_hour, seq(0, 24, by = 1), labels = seq(0,
 Matches were often played in the evening. Interestingly, dinner breaks are also captured, as seen from the dip at 8 pm. There does not seem to be any clear trend in when I perform best. Apart from the anomalies at 2 and 8 am caused by small sample size, win rate fluctuates and hovers right above 50%, suggesting not a strong effect of time played on performance.
 
 ```{r, echo = FALSE, warning = FALSE}
-#matches %>% group_by(group = cut(row_number(), seq(1, 1351, by = 50), labels = seq(50, 1350, by = 50), include.lowest = TRUE)) %>% summarise(win_rate = sum(win)/n()) %>% type.convert %>% ggplot(., aes(x = group, y= win_rate)) + geom_line()
-
-#matches %>% group_by(group = cut(row_number(), seq(1, 1401, by = 100), labels = seq(50, 1400, by = 100), include.lowest = TRUE)) %>% summarise(win_rate = sum(win)/n()) %>% type.convert %>% ggplot(., aes(x = group, y= win_rate)) + geom_line()
-
 # Rolling win rate function
 rolling_win_rate <- rollify(~sum(.x)/100, window = 100)
 
@@ -251,8 +246,6 @@ matches[c(1:1335),] %>%
   scale_colour_gradient(low = "#0054cc", high = "#90cc00") + 
   scale_y_continuous(labels = percent_format(accuracy = 1)) + 
   labs(y = "100-match rolling win rate (%)", x = "Matches played")
-
-#+ scale_colour_gradient2(low = "red", high = "blue", mid = "white", midpoint = 2017, limit = c(2014,2020))
 ```
 
 The majority of my matches were played from 2014 to 2015, where the rolling win rate often stayed above the 50% mark. Much fewer matches were played between 2016 and 2020, with the win rate dropping dramatically, likely due to a lack of consistent gaming.
@@ -270,10 +263,9 @@ herowinrates <- matches %>% group_by(ownheroID) %>%
 
 ```
 
-Since the matches played and win rate per hero varies greatly, a two-tailed binomial test is conducted for each hero assuming a win rate of 50% to account for both variables. P-values for an alternative hypothesis of a win rate  than 50% are obtained.
+Since the matches played and win rate per hero varies greatly, a two-tailed binomial test is conducted for each hero to account for both variables. P-values for an alternative hypothesis of a win rate not equal to 50% are obtained.
 
 ```{r, echo = FALSE}
-#check after knitting
 #Choosing win rates above 50%
 which(herowinrates$win_rate > 0.5)[c(1:10)] %>% 
   herowinrates[.,] %>% 
@@ -296,8 +288,7 @@ which(herowinrates$win_rate < 0.5)[c(1:5)] %>%
   labs(x = "Increasing P-value", y = "Loss rate (%)")  + 
   ggtitle("Heroes with worst win rate") +
   coord_flip(ylim = c(0, 1), xlim = c(1, 5), clip="off") + 
-  annotate("segment", x = 3.25, xend = 2.25, y = -0.245, yend = -0.245, arrow=arrow(length=unit(0.2, "cm")))
-
+  annotate("segment", x = 3.5, xend = 2.5, y = -0.24, yend = -0.24, arrow=arrow(length=unit(0.2, "cm")))
 ```
 
 Based on p-values, the top three heroes I should choose to win are Necrophos, Queen of Pain and Ember spirit since they have the highest probabilities of having a more than average win rate. On the other hand, I should not choose Rubick, Bounty Hunter and Huskar.
@@ -322,7 +313,7 @@ cor(matches[,c(2,3,5:7,16:26)]) %>%
 
 A blue colour represents a higher positive correlation between the two corresponding variables. Red represents the opposite.
 
-The original match data is at the bottom-left corner. Kills and assists are the most positively correlated with wins while deaths are negatively correlated, in line with the analysis above. The duration of the match has likely little effect on the win rate.
+The original match data is at the bottom-left corner. Kills and assists are the most positively correlated with wins while deaths are negatively correlated, in line with the analysis above. The duration of the match has little correlation with the win rate.
 
 The additional attributes of heroes I played are represented on the top-right side. For example, the Initiator and Disabler attributes are fairly strongly correlated, which makes sense when considering heroes that can initiate team fights normally do so by "disabling" the opponent.
 
@@ -362,7 +353,7 @@ matchesbyroles %>% melt(.) %>%
 
 Since the summed hero attributes are discrete variables with a small range, a mean plot is made with a +/- one standard deviation range. The difference in magnitude between each variable is not very significant, considering the summed hero attributes for each attribute is not equal. For example, each hero needs to have at least a complexity of one, which is not a requirement for other values. This results in complexity having the highest magnitude.
 
-Comparing the hero attribute composition between winning and losing matches, little differences are seen apart for the deviation in complexity, Initiator and Escape. A higher value for these attributes might result in a higher chance of losing, but a multiple logistic regression model is more useful in accurately analysing this.
+Comparing the hero attribute composition between winning and losing matches, little differences are seen apart from the deviation in Complexity, Initiator and Escape. A higher value for these attributes might result in a higher chance of losing, but a multiple logistic regression model is more useful in accurately analysing this.
 
 ```{r}
 set.seed(1)

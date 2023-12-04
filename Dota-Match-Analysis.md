@@ -11,9 +11,9 @@ has distinct abilities and roles.
 
 My own matches will be analysed in this project, with the main goal of
 understanding what factors improve my odds of winning. Most of the data
-is retrieved from the OpenDota API <https://docs.opendota.com/>. Extra
+is retrieved from the [OpenDota API](https://docs.opendota.com/). Extra
 data on hero attributes is scraped from a Dota 2 Wikipedia page
-<https://liquipedia.net/dota2/Hero_Roles>.
+[Liquipedia](https://liquipedia.net/dota2/Hero_Roles).
 
 ## Loading Data and Dependencies
 
@@ -31,7 +31,7 @@ library(caret)
 theme_set(theme_minimal())
 
 # Importing data
-file.path <-"*"
+file.path <-"****"
 hero <- read.csv(paste0(file.path, "dotahero.csv"), header = TRUE)
 heroroles <- read.csv(paste0(file.path, "dotaheroroles.csv"), header = TRUE)
 matches <- read.csv(paste0(file.path, "dotamatches.csv"), header = TRUE)
@@ -94,8 +94,8 @@ with more roles attributed to them will be weighted higher. A histogram
 of the sum of each heros’ role attributes (excluding complexity) is
 plotted.
 
-A relatively wide distribution is seen, thus normalisation might have to
-be done to ensure equal weighting.
+A relatively wide distribution is seen, thus normalisation can be
+considered to ensure equal weighting.
 
 One value is 0, suggesting an error on the website.
 
@@ -110,8 +110,6 @@ hero$Melee <- ifelse(hero$attack_type == "Melee", 1,0)
 hero <- merge(hero, heroroles, by.x = "localized_name", by.y = "Hero")
 # Removing unnecessary columns, renaming hero name
 hero <- hero[, c(-3,-5,-17)] %>% rename(name = localized_name)
-#Standardised hero role attributes
-#standardhero <- hero %>% mutate_at(c(7:15), list(~./role.sum)) %>% .[,c(-3,-16)] %>% rename(name = localized_name)
 ```
 
 The last faulty value is fixed. The Melee column is converted to binary
@@ -142,9 +140,10 @@ Explanation of variables in hero data:
 - **primary_attr**: An attribute that is either strength, intelligence
   or agility, which is hard to interpret without Dota knowledge
 
-- **Melee**: 1 if the hero attacks with melee, and 0 if it is ranged A
-  higher number for the following attributes relates to a higher
-  intensity:
+- **Melee**: 1 if the hero attacks with melee, and 0 if it is ranged
+
+A higher number for the following attributes relates to a higher
+intensity:
 
 - **Complexity**: Difficulty in playing a hero
 
@@ -161,7 +160,7 @@ Explanation of variables in hero data:
 
 - **Durable**: A hero that can survive high amounts of damage
 
-- **Support**: A hero supports allies and typically the carry, and is
+- **Support**: A hero that supports allies, typically the carry, and is
   less dependent on gold and items
 
 - **Pusher**: A hero that deals high amounts of damage to towers and
@@ -275,9 +274,9 @@ herowinrates <- matches %>% group_by(ownheroID) %>%
 ```
 
 Since the matches played and win rate per hero varies greatly, a
-two-tailed binomial test is conducted for each hero assuming a win rate
-of 50% to account for both variables. P-values for an alternative
-hypothesis of a win rate than 50% are obtained.
+two-tailed binomial test is conducted for each hero to account for both
+variables. P-values for an alternative hypothesis of a win rate not
+equal to 50% are obtained.
 
 ![](Dota-Match-Analysis_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->![](Dota-Match-Analysis_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
 
@@ -302,7 +301,7 @@ corresponding variables. Red represents the opposite.
 The original match data is at the bottom-left corner. Kills and assists
 are the most positively correlated with wins while deaths are negatively
 correlated, in line with the analysis above. The duration of the match
-has likely little effect on the win rate.
+has little correlation with the win rate.
 
 The additional attributes of heroes I played are represented on the
 top-right side. For example, the Initiator and Disabler attributes are
@@ -348,8 +347,8 @@ is not a requirement for other values. This results in complexity having
 the highest magnitude.
 
 Comparing the hero attribute composition between winning and losing
-matches, little differences are seen apart for the deviation in
-complexity, Initiator and Escape. A higher value for these attributes
+matches, little differences are seen apart from the deviation in
+Complexity, Initiator and Escape. A higher value for these attributes
 might result in a higher chance of losing, but a multiple logistic
 regression model is more useful in accurately analysing this.
 
@@ -405,7 +404,7 @@ Melee
 Complexity
 </td>
 <td>
--0.182<sup>\*\*\*</sup> (0.047)
+-0.182<sup>***</sup> (0.047)
 </td>
 </tr>
 <tr>
@@ -485,7 +484,7 @@ Jungler
 Constant
 </td>
 <td>
-1.975<sup>\*\*\*</sup> (0.615)
+1.975<sup>***</sup> (0.615)
 </td>
 </tr>
 <tr>
@@ -525,10 +524,11 @@ Observations
 <em>Note:</em>
 </td>
 <td style="text-align:right">
-<sup>*</sup>p\<0.1; <sup>**</sup>p\<0.05; <sup>***</sup>p\<0.01
+<sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01
 </td>
 </tr>
 </table>
+
 
 The multiple logistic regression model with 10-fold cross validation
 suggests that only the complexity attribute is useful in predicting the
@@ -634,7 +634,7 @@ Increase in probability of win
 Omniknight
 </td>
 <td>
-1.408<sup>\*\*\*</sup> (0.374)
+1.408<sup>***</sup> (0.374)
 </td>
 </tr>
 <tr>
@@ -642,7 +642,7 @@ Omniknight
 Necrophos
 </td>
 <td>
-1.186<sup>\*\*\*</sup> (0.315)
+1.186<sup>***</sup> (0.315)
 </td>
 </tr>
 <tr>
@@ -650,7 +650,7 @@ Necrophos
 Enchantress
 </td>
 <td>
--1.323<sup>\*\*\*</sup> (0.457)
+-1.323<sup>***</sup> (0.457)
 </td>
 </tr>
 <tr>
@@ -658,7 +658,7 @@ Enchantress
 Clinkz
 </td>
 <td>
-1.039<sup>\*\*\*</sup> (0.369)
+1.039<sup>***</sup> (0.369)
 </td>
 </tr>
 <tr>
@@ -666,7 +666,7 @@ Clinkz
 Ursa
 </td>
 <td>
-0.839<sup>\*\*\*</sup> (0.304)
+0.839<sup>***</sup> (0.304)
 </td>
 </tr>
 <tr>
@@ -674,7 +674,7 @@ Ursa
 Rubick
 </td>
 <td>
--0.692<sup>\*\*\*</sup> (0.256)
+-0.692<sup>***</sup> (0.256)
 </td>
 </tr>
 <tr>
@@ -682,7 +682,7 @@ Rubick
 Wraith_King
 </td>
 <td>
-0.826<sup>\*\*\*</sup> (0.312)
+0.826<sup>***</sup> (0.312)
 </td>
 </tr>
 <tr>
@@ -690,7 +690,7 @@ Wraith_King
 Io
 </td>
 <td>
--1.164<sup>\*\*</sup> (0.456)
+-1.164<sup>**</sup> (0.456)
 </td>
 </tr>
 <tr>
@@ -698,7 +698,7 @@ Io
 Lich
 </td>
 <td>
-0.871<sup>\*\*</sup> (0.355)
+0.871<sup>**</sup> (0.355)
 </td>
 </tr>
 <tr>
@@ -706,7 +706,7 @@ Lich
 Nyx_Assassin
 </td>
 <td>
--0.686<sup>\*\*</sup> (0.289)
+-0.686<sup>**</sup> (0.289)
 </td>
 </tr>
 <tr>
@@ -714,7 +714,7 @@ Nyx_Assassin
 Drow_Ranger
 </td>
 <td>
-0.526<sup>\*\*</sup> (0.222)
+0.526<sup>**</sup> (0.222)
 </td>
 </tr>
 <tr>
@@ -722,7 +722,7 @@ Drow_Ranger
 Tusk
 </td>
 <td>
-0.699<sup>\*\*</sup> (0.298)
+0.699<sup>**</sup> (0.298)
 </td>
 </tr>
 <tr>
@@ -730,7 +730,7 @@ Tusk
 Lifestealer
 </td>
 <td>
--0.683<sup>\*\*</sup> (0.297)
+-0.683<sup>**</sup> (0.297)
 </td>
 </tr>
 <tr>
@@ -738,7 +738,7 @@ Lifestealer
 Lina
 </td>
 <td>
-0.642<sup>\*\*</sup> (0.293)
+0.642<sup>**</sup> (0.293)
 </td>
 </tr>
 <tr>
@@ -746,7 +746,7 @@ Lina
 Bounty_Hunter
 </td>
 <td>
--0.554<sup>\*\*</sup> (0.264)
+-0.554<sup>**</sup> (0.264)
 </td>
 </tr>
 <tr>
@@ -754,7 +754,7 @@ Bounty_Hunter
 Axe
 </td>
 <td>
-0.527<sup>\*\*</sup> (0.259)
+0.527<sup>**</sup> (0.259)
 </td>
 </tr>
 <tr>
@@ -762,7 +762,7 @@ Axe
 Zeus
 </td>
 <td>
-0.449<sup>\*</sup> (0.230)
+0.449<sup>*</sup> (0.230)
 </td>
 </tr>
 <tr>
@@ -770,7 +770,7 @@ Zeus
 Puck
 </td>
 <td>
--0.599<sup>\*</sup> (0.308)
+-0.599<sup>*</sup> (0.308)
 </td>
 </tr>
 <tr>
@@ -778,7 +778,7 @@ Puck
 Shadow_Fiend
 </td>
 <td>
--0.419<sup>\*</sup> (0.216)
+-0.419<sup>*</sup> (0.216)
 </td>
 </tr>
 <tr>
@@ -786,7 +786,7 @@ Shadow_Fiend
 Alchemist
 </td>
 <td>
--0.550<sup>\*</sup> (0.289)
+-0.550<sup>*</sup> (0.289)
 </td>
 </tr>
 <tr>
@@ -826,10 +826,11 @@ Observations
 <em>Note:</em>
 </td>
 <td style="text-align:right">
-<sup>*</sup>p\<0.1; <sup>**</sup>p\<0.05; <sup>***</sup>p\<0.01
+<sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01
 </td>
 </tr>
 </table>
+
 
 For the sake of brevity, only the most important heroes for the model
 are shown. Unfortunately, the accuracy of this model is also not
