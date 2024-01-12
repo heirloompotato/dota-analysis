@@ -26,6 +26,8 @@ library(scales)
 library(stargazer)
 library(glmnet)
 library(caret)
+library(randomForest)
+library(yardstick)
 
 # Set theme
 theme_set(theme_minimal())
@@ -358,7 +360,7 @@ set.seed(1)
 # Setting 10-fold cross-validation
 train_control <- trainControl(method = "cv", number = 10)
 
-# Conducting regression tests
+# Conducting logistic regression
 roles.model <- train(win ~ ., data = matchesbyroles, method = "glm", family = binomial, trControl = train_control)
 ```
 
@@ -529,7 +531,6 @@ Observations
 </tr>
 </table>
 
-
 The multiple logistic regression model with 10-fold cross validation
 suggests that only the complexity attribute is useful in predicting the
 win rate. A higher complexity attributes suggests that a team picked
@@ -547,8 +548,8 @@ matchesbyheroes <- lapply(hero$id, function(i){
 # Next, loops through each of the five heroes for each match checking for the hero ID
   apply(ifelse(matches[,c(8:12)] == i,1,0), MARGIN = 1, sum)}) %>% 
   as.data.frame() %>%
-# Adding back hero names, but replacing space with _
-  setNames(gsub(" ","_",hero$name)) %>% 
+# Adding back hero names, but replacing space and - with _ and removing '
+  setNames(gsub(" ","_",gsub("-","_",gsub("'","",hero$name)))) %>% 
 # Removing heroes that do not appear in any matches
   .[,-c(which(colMeans(.) == 0))] %>% 
   cbind(win = matches$win, .) %>%
@@ -592,7 +593,7 @@ glm_wo_intercept$fit <- function (x, y, wts, param, lev, last, classProbs, ...)
     out
 }
 
-# Conducting regression tests, with 10-fold cross validation
+# Conducting logistic regression, with 10-fold cross validation
 heroes.model <- train(win ~ ., data = matchesbyheroes, method = glm_wo_intercept, family = binomial, trControl = train_control)
 ```
 
@@ -831,10 +832,22 @@ Observations
 </tr>
 </table>
 
-
 For the sake of brevity, only the most important heroes for the model
 are shown. Unfortunately, the accuracy of this model is also not
 significantly better than when using hero role attributes as variables.
+
+``` r
+set.seed(1)
+
+# Running random forest classification
+heroes.forest <- randomForest(win ~ ., data = matchesbyheroes)
+```
+
+![](Dota-Match-Analysis_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+
+The accuracy using a Random Forest classification is slightly better
+than with logistic regression. Looking at the confusion matrix, the
+model is better at correctly predicting wins than losses.
 
 ## Conclusion
 
@@ -843,8 +856,8 @@ I perform in my games. Statistics on the hero attributes also serve as a
 rough gauge of how a normal Dota 2 match at my matchmaking rating is
 like on a broader scale. However, predicting matches based on the hero
 picks of my team is still a challenge looking at the low level of
-accuracy from the regression models. Some factors that contribute to the
-low accuracy could be the small data set and simplicity of models.
+accuracy from the classification models. Some factors that contribute to
+the low accuracy could be the small data set and simplicity of models.
 Nonetheless, the data set had sufficient samples and variables for
 trends and patterns to be extracted as a Exploratory Data Analysis (EDA)
 project.
